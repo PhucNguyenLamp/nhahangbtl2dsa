@@ -4,7 +4,9 @@
 using namespace std;
 
 // restaurant.cpp
+int MAXSIZE = 69;
 // TODO: huffman tree
+
 bool sortlist(pair<char, int> a, pair<char, int> b)
     {
         return a.second > b.second;
@@ -371,6 +373,9 @@ class G
         Node* root;
         queue<int> history;
         public:
+        bst(){
+            root = nullptr;
+        }
         Node* addhelper(Node* root, int value){
         if (!root) return new Node(value);
         if (root->val > value){
@@ -431,17 +436,17 @@ class G
     vector<bst*> list;
     int maxsize; // để cho vui hihi
     G(int maxsize){
+        this->maxsize = maxsize;
         list = vector<bst*>(maxsize);
         for (int i=0; i<maxsize; i++){
-            list[i] = nullptr;
+            list[i] = new bst();
         }
     }
     ~G(){
     }
     void insertG(int result){ //result is a decimal number
-        result = result % list.size(); // nhớ +1 
-        bst* temp = list[result];
-        temp->add(result);
+        int index = result % maxsize; // nhớ +1 
+        list[index]->add(result);
     }
         void preorder(Node* root, vector <int>& res){
             if (!root) return;
@@ -476,6 +481,7 @@ class G
         }
     }
     void printhelper(Node* root){
+        if (!root) return;
         printhelper(root->left);
         cout << root->val << " ";
         printhelper(root->right);
@@ -701,7 +707,7 @@ class Restaurant
     S* s;
     HuffTree* latesthuff; // hihi
     public:
-    Restaurant(int MAXSIZE){
+    Restaurant(){
         g = new G(MAXSIZE);
         s = new S(MAXSIZE);
     }
@@ -723,6 +729,8 @@ class Restaurant
             }
             if (!found) list.push_back(make_pair(name[i], 1));
         }
+        vector<pair<char, int>> templist1 = list;
+        if (list.size() <3) return; // chỉ tiếp khách có >= 3 kí tự khách nhau
         // caesar cipher the letter of the list, shift equals to frequency of the letter
         // for example a+2 = c and z+2 = b and Z+2 = B
         for (int i = 0; i < list.size(); i++)
@@ -748,6 +756,7 @@ class Restaurant
                 list[i].first += list[i].second;
             }
         }
+        vector<pair<char, int>> templist2 = list;
         // if there are 2 letters that is the same, combine them into 1
         for (int i = 0; i < list.size(); i++)
         {
@@ -770,20 +779,22 @@ class Restaurant
         latesthuff = huffman; // lưu vào lịch sử có gì dùng hand
 
         // traverse the tree to translate list[i].first to huffman code (binary), take 10 first letter
-        string newname = "";
-        for (int i=0; i<list.size(); i++){
-            for (int j=0; j<list[i].second; j++){
-                newname += list[i].first;
+        string newname = ""; // cùng vị trí tương dối của list cũ với list mới -> swap
+        for (int i=0; i<name.length(); i++){
+            for (int j=0; j<templist1.size(); j++){
+                if (name[i] == templist1[j].first){
+                    newname += templist2[j].first;
+                }
             }
         }
         string res = "";
         for (int i=0; i<newname.length(); i++){
-            res = res + HuffManFind(huffman->getroot(), newname[i], "");
+            res = HuffManFind(huffman->getroot(), newname[i], "") + res;
         }
-        // take first 10 letter
+        // take first 10 letter from right to left (reverse)
         res = res.substr(0, 10);
         // translate binary to decimal
-        int decimal = binToDec(res);
+        int decimal = list.size() != 1 ? binToDec(res) : 0; //check them truong hop co 1 node
         // res lẻ -> G
         // res chẵn -> S
         if (decimal % 2 == 1){
@@ -810,13 +821,12 @@ class Restaurant
 void simulate(string filename)
 {
     ifstream ss(filename);
-    int MAXSIZE;
     string str, maxsize, name, num;
-    ss >> maxsize;
+    ss >> maxsize >> maxsize;
     MAXSIZE = stoi(maxsize);
-    Restaurant *r = new Restaurant(MAXSIZE);
+    Restaurant *r = new Restaurant();
     while (ss >> str)
-    {
+    {   
         if (str == "LAPSE") // LAPSE <NAME>
         {
             ss >> name;
@@ -824,11 +834,11 @@ void simulate(string filename)
         }
         else if (str == "KOKUSEN") // KOKUSEN
         {
-            ss >> num;
             r->KOKUSEN();
         }
         else if (str == "KEITEIKEN") // KEITEIKEN <NUM>
-        {
+        {   
+            ss >> num;
             r->KEITEIKEN(stoi(num));
         }
         else if (str == "HAND") // HAND
@@ -837,6 +847,7 @@ void simulate(string filename)
         }
         else if (str == "LIMITLESS") // LIMITLESS <NUM>
         {
+            ss >> num;
             r->LIMITLESS(stoi(num));
         }
         else // CLEAVE <NUM>
@@ -849,9 +860,8 @@ void simulate(string filename)
 
 // main.cpp
 int main(int argc, char *argv[])
-{
+{   
     string fileName = "test.txt";
     simulate(fileName);
-
     return 0;
 }
