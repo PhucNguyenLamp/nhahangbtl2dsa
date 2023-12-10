@@ -77,7 +77,9 @@ int countWays(vector<int>& arr, int fact[])
 	return nCr(fact, N - 1, N1) * countLeft * countRight;
 }
 
-struct Node{
+class G
+{   
+    struct Node{
         int val;
         Node *left;
         Node *right;
@@ -88,70 +90,70 @@ struct Node{
         Node(int val, Node *left, Node *right) : val(val), left(left), right(right) {}
         ~Node() {}
     };
-class bst{
-    public:
-    Node* root;
-    queue<int> history;
-    public:
-    Node* addhelper(Node* root, int value){
-    if (!root) return new Node(value);
-    if (root->val > value){
-        root->left = addhelper(root->left,value);
-    } else {
-        root->right = addhelper(root->right,value);
-    }
-    return root;
-    }
-    int getSize(Node* root){
-        //get tree size
-        if (!root) return 0;
-        return 1 + getSize(root->left) + getSize(root->right);
-    }
-    void add(int value){
-        //TODO
-        history.push(value);
-        root = addhelper(root, value);
-    }
-    Node* deletehelper(Node* root, int value){
-        if (!root){
-            return nullptr;
-        }
-        if (root->val > value){ //succ
-            root->left = deletehelper(root->left,value);
-        } else if (root->val < value){
-            root->right = deletehelper(root->right,value);
+    class bst{
+        public:
+        Node* root;
+        queue<int> history;
+        public:
+        Node* addhelper(Node* root, int value){
+        if (!root) return new Node(value);
+        if (root->val > value){
+            root->left = addhelper(root->left,value);
         } else {
-            if (!root->left){
-                return root->right;
-            } else if (!root->right){
-                return root->left;
-            }
-            else{
-                Node* succParent = root;
-                Node* succ= root->right;
-                while(succ->left){
-                    succParent = succ;
-                    succ = succ->left;
-                }
-                if (succParent!=root){
-                    succParent->left = succ->right;
-                } else {
-                    succParent->right = succ->right;
-                }
-                root->val = succ->val;
-            }
+            root->right = addhelper(root->right,value);
         }
         return root;
         }
-        void deleteNode(int value){
-            //TODO
-            root = deletehelper(root, value);
+        int getSize(Node* root){
+            //get tree size
+            if (!root) return 0;
+            return 1 + getSize(root->left) + getSize(root->right);
         }
-};
-class G
-{   
+        void add(int value){
+            //TODO
+            history.push(value);
+            root = addhelper(root, value);
+        }
+        Node* deletehelper(Node* root, int value){
+            if (!root){
+                return nullptr;
+            }
+            if (root->val > value){ //succ
+                root->left = deletehelper(root->left,value);
+            } else if (root->val < value){
+                root->right = deletehelper(root->right,value);
+            } else {
+                if (!root->left){
+                    return root->right;
+                } else if (!root->right){
+                    return root->left;
+                }
+                else{
+                    Node* succParent = root;
+                    Node* succ= root->right;
+                    while(succ->left){
+                        succParent = succ;
+                        succ = succ->left;
+                    }
+                    if (succParent!=root){
+                        succParent->left = succ->right;
+                    } else {
+                        succParent->right = succ->right;
+                    }
+                    root->val = succ->val;
+                }
+            }
+            return root;
+            }
+            void deleteNode(int value){
+                //TODO
+                root = deletehelper(root, value);
+            }
+    };
+
     public:
     vector<bst*> list;
+    int maxsize; // để cho vui hihi
     G(int maxsize){
         list = vector<bst*>(maxsize);
         for (int i=0; i<maxsize; i++){
@@ -160,8 +162,8 @@ class G
     }
     ~G(){
     }
-    void insertS(int result){ //result is a decimal number
-        result = result % list.size();
+    void insertG(int result){ //result is a decimal number
+        result = result % list.size(); // nhớ +1 
         bst* temp = list[result];
         temp->add(result);
     }
@@ -171,7 +173,7 @@ class G
             preorder(root->left, res);
             preorder(root->right, res);
         }
-    void removeS(){
+    void removeG(){
         // lap lai tat ca khu vuc
         for (int i=0; i<list.size(); i++){
             bst* temp = list[i];
@@ -202,7 +204,7 @@ class G
         cout << root->val << " ";
         printhelper(root->right);
     }
-    void printS(int number){
+    void printG(int number){
         //TODO:
         bst* temp = list[--number]; //index thầy cho là 1 nên phải trừ đi 1 về 0
         if (!temp) return;

@@ -1,36 +1,6 @@
 #include <bits/stdc++.h>
 #include <string>
 using namespace std;
-struct Node { //lệnh của từng vùng (một list)
-    int id;
-    vector<int> list; //trong đây cũng có size
-    Node(int id){
-        this->id = id; // từ 1->maxsize
-    }
-    int size() { // số khách
-        return list.size();
-    }
-    void insert(int result){
-        list.insert(list.begin(), result); // vào cuối ở đầu
-    }
-    void remove(){
-        if (list.size() == 0) return;
-        // result - id
-        cout << list[list.size()-1] << "-" << id << endl;
-        list.pop_back(); // ra cuối ở cuối
-    }
-    int findindex(int result){ // vào sớm -> index lớn hơn, vào trễ -> index nhỏ
-        for (int i=0; i<list.size(); i++){
-            if (list[i] == result){
-                return i;
-            }
-        }
-        return -1;
-    }
-    void removeat(int index){ // xoá ở vị trí
-        list.erase(list.begin() + index);
-    }
-};
 // class heap{
 //     int *arr;
 //     int capacity;
@@ -118,6 +88,37 @@ struct Node { //lệnh của từng vùng (một list)
 //     }
 // };
 class S { 
+    struct Node { //lệnh của từng vùng (một list)
+    int id;
+    vector<int> list; //trong đây cũng có size
+    Node(int id){
+        this->id = id; // từ 1->maxsize
+    }
+    int size() { // số khách
+        return list.size();
+    }
+    void insert(int result){
+        list.insert(list.begin(), result); // vào cuối ở đầu
+    }
+    void remove(){
+        if (list.size() == 0) return;
+        // result - id
+        cout << list[list.size()-1] << "-" << id << endl;
+        list.pop_back(); // ra cuối ở cuối
+    }
+    int findindex(int result){ // vào sớm -> index lớn hơn, vào trễ -> index nhỏ
+        for (int i=0; i<list.size(); i++){
+            if (list[i] == result){
+                return i;
+            }
+        }
+        return -1;
+    }
+    void removeat(int index){ // xoá ở vị trí
+        list.erase(list.begin() + index);
+    }
+};
+
     private:
     int maxsize;
     vector<Node*> area; // min heap
