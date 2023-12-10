@@ -766,6 +766,9 @@ class Restaurant
             TreeArray.push_back(new HuffTree(list[i].first, list[i].second));
         }
         HuffTree *huffman = buildHuffvector(TreeArray, list.size());
+
+        latesthuff = huffman; // lưu vào lịch sử có gì dùng hand
+
         // traverse the tree to translate list[i].first to huffman code (binary), take 10 first letter
         string newname = "";
         for (int i=0; i<list.size(); i++){
@@ -781,6 +784,12 @@ class Restaurant
         res = res.substr(0, 10);
         // translate binary to decimal
         int decimal = binToDec(res);
+        // res lẻ -> G
+        // res chẵn -> S
+        if (decimal % 2 == 1){
+            g->insertG(decimal);
+        }
+        else s->insertarea(decimal);
     }
     void KOKUSEN(){
         g->removeG();
@@ -789,7 +798,7 @@ class Restaurant
         s->keiteiken(num);
     }
     void HAND(){ // In huffman khách gần nhất in order
-
+        printtreeinorder(latesthuff->getroot());
     }
     void LIMITLESS(int num){
         g->printG(num);
