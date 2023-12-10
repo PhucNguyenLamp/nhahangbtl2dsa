@@ -44,15 +44,18 @@ class HuffTree
 {
 public:
     Node* root; // Tree root
+    int clock;
 public:
     HuffTree(char &value, int weight) // Leaf constructor
     {
         root = new Node(value, weight);
+        clock = 0;
     }
     // Internal node constructor
-    HuffTree(HuffTree *left, HuffTree *right) //nhận vào hufftree
+    HuffTree(HuffTree *left, HuffTree *right, int clock) //nhận vào hufftree
     {
         root = new Node(left->root, right->root);
+        this->clock = clock;
     }
     ~HuffTree() {}                          // Destructor
     Node* getroot() { return root; }    // Get root
@@ -148,27 +151,15 @@ HuffTree *buildHuffvector(vector<HuffTree*> TreeArray, int count)
                         return a->getValue() < b->getValue();
                     }
                 }
-                else if (a->isLeaf() && !b->isLeaf()) // b ko phải leaf, b ra sau
-                {   
-                    // 
-                    return false;
-                }
-                else if (!a->isLeaf() && b->isLeaf()) // a ko phải leaf, a ra sau
-                {   
-                    // cho b ra trước
-                    return true;
-                }
-                else // cả 2 ko phải leaf, thằng chèn ra sau (a)
-                {
-                    // cho a ra sau
-                    return false; // ko hieu tai sao
+                else {
+                    return a->clock > b->clock; // trễ hơn đứng sau
                 }
             }
             // frequecy a < frequency b
             return a->getweight() >= b->getweight();
         }
     };
-
+    int clock = 0;
     priority_queue<HuffTree*, vector<HuffTree*>, compare> *forest = new priority_queue<HuffTree*, vector<HuffTree*>, compare>;
     for (int i = 0; i < count; i++)
     {
@@ -179,11 +170,12 @@ HuffTree *buildHuffvector(vector<HuffTree*> TreeArray, int count)
     while (forest->size() > 1)
     {   
         int time = 0;
+        clock++;
         HuffTree* temp1 = forest->top(); // Pull first two trees
         forest->pop();
         HuffTree* temp2 = forest->top(); // off the list
         forest->pop();
-        HuffTree* temp3 = new HuffTree(temp1, temp2);
+        HuffTree* temp3 = new HuffTree(temp1, temp2, clock);
         // quay cây ở đây
         temp3->root = balanceTree(temp3->getroot(), time);
         forest->push(temp3); // Put the new tree back on the list
@@ -810,6 +802,7 @@ class Restaurant
     }
     void HAND(){ // In huffman khách gần nhất in order
         printtreeinorder(latesthuff->getroot());
+        printHuffmanCodingTree(latesthuff->getroot());
     }
     void LIMITLESS(int num){
         g->printG(num);
@@ -861,7 +854,7 @@ void simulate(string filename)
 // main.cpp
 int main(int argc, char *argv[])
 {   
-    string fileName = "test.txt";
+    string fileName = "testnhehon.txt";
     simulate(fileName);
     return 0;
 }

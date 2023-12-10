@@ -1,0 +1,3 @@
+MAXSIZE 5
+LAPSE abcdeff
+HAND
