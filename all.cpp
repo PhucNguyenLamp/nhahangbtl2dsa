@@ -184,12 +184,13 @@ HuffTree *buildHuffvector(vector<HuffTree*> TreeArray, int count)
 
     return forest->top(); // Return the final tree
 }
-void printTree(Node *root){
+void printTree(Node *root){ // ko dùng
     if (!root->isLeafType()) {printTree(root->left); }
     cout << root->weight << " " << endl;
     if (!root->isLeafType()) {printTree(root->right); }
 }
 void printtreeinorder(Node *root){
+    if (!root) return;
     if (!root->isLeafType()) {printtreeinorder(root->left);}
     if (root->isLeafType()) cout << root->value << endl;
     if (!root->isLeafType()) cout << root->weight << endl;
@@ -702,6 +703,7 @@ class Restaurant
     Restaurant(){
         g = new G(MAXSIZE);
         s = new S(MAXSIZE);
+        latesthuff = nullptr;
     }
     ~Restaurant(){
     }
@@ -748,19 +750,26 @@ class Restaurant
                 list[i].first += list[i].second;
             }
         }
+        // TODO: chưa hợp hết lại được
         vector<pair<char, int>> templist2 = list;
         // if there are 2 letters that is the same, combine them into 1
+        vector<pair<char, int>> mergelist;
         for (int i = 0; i < list.size(); i++)
-        {
-            for (int j = i + 1; j < list.size(); j++)
+        {   
+            bool found = false;
+            for (int j = 0; j < mergelist.size(); j++)
             {
-                if (list[i].first == list[j].first)
+                if (mergelist[j].first == list[i].first)
                 {
-                    list[i].second += list[j].second;
-                    list.erase(list.begin() + j);
+                    mergelist[j].second += list[i].second;
+                    found = true;
+                    break;
                 }
             }
+            if (!found) mergelist.push_back(make_pair(list[i].first, list[i].second));
         }
+        list = mergelist;
+
         vector<HuffTree*> TreeArray;
         for (int i = 0; i < list.size(); i++)
         {
@@ -801,8 +810,9 @@ class Restaurant
         s->keiteiken(num);
     }
     void HAND(){ // In huffman khách gần nhất in order
+        if (!latesthuff) return;
         printtreeinorder(latesthuff->getroot());
-        printHuffmanCodingTree(latesthuff->getroot());
+        // printHuffmanCodingTree(latesthuff->getroot());
     }
     void LIMITLESS(int num){
         g->printG(num);
