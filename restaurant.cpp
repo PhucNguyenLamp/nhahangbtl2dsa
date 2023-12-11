@@ -786,8 +786,10 @@ class Restaurant
         }
         string res = "";
         for (int i=0; i<newname.length(); i++){
-            res = HuffManFind(huffman->getroot(), newname[i], "") + res;
+            res = res + HuffManFind(huffman->getroot(), newname[i], "");
         }
+        // reverse res and
+        reverse(res.begin(), res.end());
         // take first 10 letter from right to left (reverse)
         res = res.substr(0, 10);
         // translate binary to decimal

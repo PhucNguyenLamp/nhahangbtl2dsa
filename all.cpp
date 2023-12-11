@@ -729,25 +729,29 @@ class Restaurant
         // for example a+2 = c and z+2 = b and Z+2 = B
         for (int i = 0; i < list.size(); i++)
         {
-            if (list[i].first >= 'a' && list[i].first <= 'z')
-            {
-                list[i].first += list[i].second;
-                if (list[i].first > 'z')
+            if (islower(list[i].first))
+            {   
+                int shift = list[i].second % 26;
+                if (list[i].first + shift > 'z')
                 {
-                    list[i].first -= 26;
+                    list[i].first = list[i].first - 26 + shift;
+                } else {
+                    list[i].first += shift;
                 }
             }
-            else if (list[i].first >= 'A' && list[i].first <= 'Z')
-            {
-                list[i].first += list[i].second;
-                if (list[i].first > 'Z')
+            else if (isupper(list[i].first))
+            {   
+                int shift = list[i].second % 26;
+                if (list[i].first + shift > 'Z')
                 {
-                    list[i].first -= 26;
+                    list[i].first = list[i].first - 26 + shift;
+                } else {
+                    list[i].first += shift;
                 }
             }
             else //để cho vui thôi, không có chữ cái nào khác cả
             {
-                list[i].first += list[i].second;
+                // list[i].first += list[i].second;
             }
         }
         // TODO: chưa hợp hết lại được
@@ -790,12 +794,15 @@ class Restaurant
         }
         string res = "";
         for (int i=0; i<newname.length(); i++){
-            res = HuffManFind(huffman->getroot(), newname[i], "") + res;
+            res = res + HuffManFind(huffman->getroot(), newname[i], "");
         }
+        // reverse res and
+        reverse(res.begin(), res.end());
         // take first 10 letter from right to left (reverse)
         res = res.substr(0, 10);
         // translate binary to decimal
         int decimal = list.size() != 1 ? binToDec(res) : 0; //check them truong hop co 1 node
+        // cout << decimal;
         // res lẻ -> G
         // res chẵn -> S
         if (decimal % 2 == 1){
@@ -812,7 +819,7 @@ class Restaurant
     void HAND(){ // In huffman khách gần nhất in order
         if (!latesthuff) return;
         printtreeinorder(latesthuff->getroot());
-        // printHuffmanCodingTree(latesthuff->getroot());
+        printHuffmanCodingTree(latesthuff->getroot());
     }
     void LIMITLESS(int num){
         g->printG(num);
