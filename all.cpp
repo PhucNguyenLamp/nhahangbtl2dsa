@@ -156,7 +156,7 @@ HuffTree *buildHuffvector(vector<HuffTree*> TreeArray, int count)
                 }
             }
             // frequecy a < frequency b
-            return a->getweight() >= b->getweight();
+            return a->getweight() > b->getweight();
         }
     };
     int clock = 0;
@@ -180,6 +180,7 @@ HuffTree *buildHuffvector(vector<HuffTree*> TreeArray, int count)
         temp3->root = balanceTree(temp3->getroot(), time);
         forest->push(temp3); // Put the new tree back on the list
         // printHuffmanCodingTree(temp3->getroot());
+        // cout << "**********************"<<endl;
     }
 
     return forest->top(); // Return the final tree
@@ -480,7 +481,6 @@ class G
         printhelper(root->right);
     }
     void printG(int number){
-        //TODO:
         bst* temp = list[--number]; //index thầy cho là 1 nên phải trừ đi 1 về 0
         if (!temp) return;
         printhelper(temp->root);
@@ -492,8 +492,10 @@ class S {
     struct Node { //lệnh của từng vùng (một list)
     int id;
     vector<int> list; //trong đây cũng có size
-    Node(int id){
+    int time; // thời gian vào
+    Node(int id, int time){
         this->id = id; // từ 1->maxsize
+        this->time = time;
     }
     int size() { // số khách
         return list.size();
@@ -518,12 +520,12 @@ class S {
     void removeat(int index){ // xoá ở vị trí
         list.erase(list.begin() + index);
     }
-};
+};  
 
     private:
     int maxsize;
     vector<Node*> area; // min heap
-    vector<int> history; // index bé hơn là thay đổi sớm hơn
+    int time = 0;
     private:
     // hàm hỗ trợ hàm chính
     void reheapdown(int position){ 
@@ -533,45 +535,26 @@ class S {
         int rightChild = 2 * position + 2;
         int min = position; // min heap
         if (leftChild < area.size()){
-            min = (area[leftChild]->size() < area[min]->size()) ? position : leftChild; 
+            min = (area[leftChild]->size() < area[min]->size()) ? leftChild : position; 
         }
         if(rightChild < area.size()){
-            min = (area[rightChild]->size() < area[min]->size()) ? min : rightChild;
+            min = (area[rightChild]->size() < area[min]->size()) ? rightChild : min;
         }
         // check neu left child = right child -> min = child duoc thay doi som hon trong history
         if (rightChild < area.size() && area[leftChild]->size() == area[rightChild]->size() && area[leftChild]->size() < area[min]->size()){
-            // index left < index right ? index left : index right
-            int indexleft;
-            int indexright;
-            for (int i=0; i<history.size(); i++){
-                if (history[i] == area[leftChild]->id){
-                    indexleft = i;
-                }
-                if (history[i] == area[rightChild]->id){
-                    indexright = i;
-                }
-            }
-            min = indexleft < indexright ? leftChild : rightChild;
+            // min là time nhỏ hơn
+            min = area[leftChild]->time < area[rightChild]->time ? leftChild : rightChild;
         }
         if(min != position){
             swap(area[min], area[position]);
             reheapdown(min);
         }
     }
-    int reheapuphelper(vector<int> history, int id){
-        for (int i=0; i<history.size(); i++){
-            if (history[i] == id){
-                return i;
-            }
-        }
-        return -1;
-    }
     void reheapup(int position){
         int parent = (position - 1) / 2;
         while(position > 0 && area[position]->size() < area[parent]->size()
         || (position > 0 && area[position]->size() == area[parent]->size() && 
-        reheapuphelper(history, area[position]->id) < reheapuphelper(history, area[parent]->id)
-        )){ // check nếu 2 khu vực có số khách bằng nhau thì chọn khu vực có index nhỏ hơn
+        area[position]->time < area[parent]->time)){ // check nếu 2 khu vực có số khách bằng nhau thì chọn khu vực có index nhỏ hơn
             swap(area[position], area[parent]);
             position = parent;
             parent = (position - 1) / 2;
@@ -586,7 +569,7 @@ class S {
         return -1;
     }
     void push(int id){ // thêm node mới vào
-        Node* newnode = new Node(id);
+        Node* newnode = new Node(id, time);
         area.push_back(newnode);
         // reheapup(area.size()-1); chưa cần reheapup vì chưa có giá trị gì?
     }
@@ -595,8 +578,8 @@ class S {
         if (index == -1) return;
         area[index] = area[area.size() - 1];
         area.pop_back();
-        reheapdown(index);
-        reheapup(index);
+        if (index < area.size()) reheapdown(index); //? cứu hoả
+        if (index < area.size()) reheapup(index); 
     }
     public:
     S(int maxsize){
@@ -605,82 +588,63 @@ class S {
     // lệnh của nhà hàng
     void insertarea(int result){ //min heap 
         // tìm id
+        time++;
         int ID = (result % maxsize) + 1; //từ 1 -> maxsize
         if (findindex(ID) != -1){ // đã có khu vực này
-        // có rồi -> add người vào 
-        //TODO: hàm int findindex
-        int index = findindex(ID);
-        //TODO: hàm Node::insert
-        area[index]->insert(result); 
-        reheapup(index);
-        reheapdown(index);
+            // có rồi -> add người vào 
+            //hàm int findindex
+            int index = findindex(ID);
+            // hàm Node::insert
+            area[index]->insert(result);
+            area[index]->time = time; 
+            reheapup(index);
+            reheapdown(index);
         }
         else{
-        //TODO: hàm S::push 
-        push(ID);
-        int index = findindex(ID);
-        area[index]->insert(result); //reheap?
-        reheapup(index);
-        reheapdown(index);
+        // hàm S::push 
+            push(ID);
+            int index = findindex(ID);
+            area[index]->insert(result); //reheap?
+            area[index]->time = time;
+            reheapup(index);
+            reheapdown(index);
         }
         // them vao history
         // check có chưa
         // nếu chưa có add tại 0
         // nếu có -> find vào xoá -> add tại 0
-        int index = -1;
-        for (int i=0; i<history.size(); i++){
-            if (history[i] == ID){
-                index = i;
-            }
+    }
+    // sort theo val, neu val = thi theo time
+    static bool sortlist(Node* a, Node* b){
+        if (a->size() == b->size()){
+            return a->time < b->time;
         }
-        if (index != -1){ // tìm dc
-            history.erase(history.begin() + index);
-            history.insert(history.begin(), ID);
-        } else { // ko tìm dc
-            history.insert(history.begin(), ID); // vào càng sớm càng bé
-        }
+        return a->size() < b->size();
     }
     void keiteiken(int value){
         // đuổi num khách ở trong num khu vực
+        // find num smallest area in heap
+        vector<Node*> temp = area;
+        sort(temp.begin(), temp.end(), sortlist);
         for (int i=0; i<value; i++){
-            bool deleted = false;
-            int tempindex = area[0]->id;
+            time++;
+            Node* tempnode = area[findindex(temp[i]->id)];
             for (int j=0; j<value; j++){
-                area[i]->remove(); // hàm này có in rồi
-                if (area[i]->size() == 0){
-                    remove(area[i]->id); // xoá khu vực
-                    deleted = true;
-                }
+                tempnode->remove();
             }
-            //update history
-            // i là khu vực
-            // j là khách
-            if (deleted){ // nếu bị xoá thì xoá khỏi history
-                int index;
-                for (int i=0; i<history.size(); i++){
-                    if (history[i] == tempindex){
-                        index = i;
-                    }
-                }
-                history.erase(history.begin() + index);
-            } else { // nếu ko bị xoá thì đưa lên đầu history
-                int index;
-                for (int i=0; i<history.size(); i++){
-                    if (history[i] == tempindex){
-                        index = i;
-                    }
-                }
-                history.erase(history.begin() + index);
-                history.insert(history.begin(), tempindex);
+            tempnode->time = time;
+            if (tempnode->size() == 0){
+                remove(tempnode->id);
             }
         }
+        // in ra thứ tự đuổi FIFO
     }
         void printpreorder(vector<Node*> arr, int size, int index) {
             if (index >= size) {
                 return;
             }
             for (int i=0; i<arr[index]->list.size(); i++){
-                cout << arr[index]->id << " " << arr[index]->list[i] << endl;
+                cout << arr[index]->id << "-" << arr[index]->list[i] << endl;
             }
             printpreorder(arr, size, 2 * index + 1);
 
@@ -773,7 +737,11 @@ class Restaurant
             if (!found) mergelist.push_back(make_pair(list[i].first, list[i].second));
         }
         list = mergelist;
-
+        //cout << merge list
+        // for (int i = 0; i < list.size(); i++)
+        // {
+        //     cout << list[i].first << " " << list[i].second << endl;
+        // }
         vector<HuffTree*> TreeArray;
         for (int i = 0; i < list.size(); i++)
         {
@@ -802,7 +770,7 @@ class Restaurant
         res = res.substr(0, 10);
         // translate binary to decimal
         int decimal = list.size() != 1 ? binToDec(res) : 0; //check them truong hop co 1 node
-        // cout << decimal;
+        cout << "decimal: "<<decimal << endl;
         // res lẻ -> G
         // res chẵn -> S
         if (decimal % 2 == 1){
@@ -871,7 +839,7 @@ void simulate(string filename)
 // main.cpp
 int main(int argc, char *argv[])
 {   
-    string fileName = "testnhehon.txt";
+    string fileName = "test.txt";
     simulate(fileName);
     return 0;
 }
